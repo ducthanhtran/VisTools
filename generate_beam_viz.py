@@ -15,6 +15,7 @@
 
 
 # Modified by Alexander Rush, 2007
+# Modified by Gabriel Bretschner, 2018
 
 """ Generate beam search visualization.
 """
@@ -28,10 +29,14 @@ import argparse
 import os
 import json
 import shutil
+import logging
 from string import Template
 
 import networkx as nx
 from networkx.readwrite import json_graph
+
+logging.getLogger().setLevel(logging.INFO)
+logging.basicConfig(format='[%(levelname)s:generate_beam_viz] %(message)s', level=logging.INFO)
 
 PARSER = argparse.ArgumentParser(
     description="Generate beam search visualizations")
@@ -63,67 +68,74 @@ HTML_TEMPLATE = Template("""
 
 
 def _add_graph_level(graph, level, parent_ids, names, scores):
-  """Adds a levelto the passed graph"""
-  for i, parent_id in enumerate(parent_ids):
-    new_node = (level, i)
-    parent_node = (level - 1, parent_id)
-    score_str = '%.3f' % float(scores[i]) if scores[i] is not None else '-inf'
-    graph.add_node(new_node)
-    graph.node[new_node]["name"] = names[i]
-    graph.node[new_node]["score"] = score_str
-    graph.node[new_node]["size"] = 100
-    # Add an edge to the parent
-    graph.add_edge(parent_node, new_node)
+    """Adds a levelto the passed graph"""
+    scores_list = scores if isinstance(scores, list) else [scores]
+    for i, parent_id in enumerate(parent_ids):
+        new_node = (level, i)
+        parent_node = (level - 1, parent_id)
+        score_str = '%.3f' % float(scores_list[i]) if scores_list[i] is not None else '-inf'
+        graph.add_node(new_node)
+        graph.node[new_node]["name"] = names[i]
+        graph.node[new_node]["score"] = score_str
+        graph.node[new_node]["size"] = 100
+        # Add an edge to the parent
+        graph.add_edge(parent_node, new_node)
 
-def create_graph(predicted_ids, parent_ids, scores, vocab=None):
-  def get_node_name(pred):
-    return vocab[pred] if vocab else pred
 
-  seq_length = len(predicted_ids) #.shape[0]
-  graph = nx.DiGraph()
-  for level in range(seq_length):
-    names = [get_node_name(pred) for pred in predicted_ids[level]]
-    _add_graph_level(graph, level + 1, parent_ids[level], names, scores[level])
-  graph.node[(0, 0)]["name"] = "START"
-  return graph
+def create_graph(predicted_ids, parent_ids, scores, predicted_tokens):
+
+    seq_length = len(predicted_ids)  # .shape[0]
+    graph = nx.DiGraph()
+    graph.add_node((0, 0))
+
+    for level in range(seq_length):
+        names = [pred for pred in predicted_tokens[level]]
+        _add_graph_level(graph, level + 1, parent_ids[level], names, scores[level])
+
+    graph.node[(0, 0)]["name"] = "START"
+    return graph
 
 
 def main():
-  beam_data = json.load(open(ARGS.data, 'r'))
+    if not os.path.exists(ARGS.output_dir):
+        os.makedirs(ARGS.output_dir)
 
-  # Optionally load vocabulary data
-  vocab = None
+    path_base = os.path.dirname(os.path.realpath(__file__))
 
-  if not os.path.exists(ARGS.output_dir):
-    os.makedirs(ARGS.output_dir)
+    # Copy required files
+    shutil.copy2(path_base + "/beam_search_viz/tree.css", ARGS.output_dir)
+    shutil.copy2(path_base + "/beam_search_viz/tree.js", ARGS.output_dir)
 
-  path_base = os.path.dirname(os.path.realpath(__file__))
+    with open(ARGS.data, 'r') as file:
+        idx = 0
 
-  # Copy required files
-  shutil.copy2(path_base+"/beam_search_viz/tree.css", ARGS.output_dir)
-  shutil.copy2(path_base+"/beam_search_viz/tree.js", ARGS.output_dir)
+        for line in file:
+            logging.info("Process sentence %d" % idx)
+            beam_data = json.loads(line)
 
-  for idx in range(len(beam_data["predicted_ids"])):
-    predicted_ids = beam_data["predicted_ids"][idx]
-    parent_ids = beam_data["beam_parent_ids"][idx]
-    scores = beam_data["scores"][idx]
+            predicted_ids = beam_data["predicted_ids"]
+            parent_ids = beam_data["parent_ids"]
+            predicted_tokens = beam_data["predicted_tokens"]
+            scores = beam_data["scores"]
 
-    graph = create_graph(
-        predicted_ids=predicted_ids,
-        parent_ids=parent_ids,
-        scores=scores,
-        vocab=vocab)
+            graph = create_graph(
+                predicted_ids=predicted_ids,
+                parent_ids=parent_ids,
+                scores=scores,
+                predicted_tokens=predicted_tokens)
 
-    json_str = json.dumps(
-        json_graph.tree_data(graph, (0, 0)),
-        ensure_ascii=True)
+            json_str = json.dumps(
+                json_graph.tree_data(graph, (0, 0)),
+                ensure_ascii=True)
 
-    html_str = HTML_TEMPLATE.substitute(DATA=json_str)
-    output_path = os.path.join(ARGS.output_dir, "{:06d}.html".format(idx))
-    with open(output_path, "w") as file:
-      file.write(html_str)
-    print(output_path)
+            html_str = HTML_TEMPLATE.substitute(DATA=json_str)
+            output_path = os.path.join(ARGS.output_dir, "{:06d}.html".format(idx))
+            with open(output_path, "w") as file:
+                file.write(html_str)
+
+            logging.info("write output to \t%s" % output_path)
+            idx += 1
 
 
 if __name__ == "__main__":
-  main()
+    main()
