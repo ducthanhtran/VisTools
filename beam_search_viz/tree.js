@@ -14,13 +14,14 @@
 
 var margin = { top: 20, right: 120, bottom: 20, left: 120 },
   width = 5000 - margin.right - margin.left,
-  height = 1000 - margin.top - margin.bottom;
+  height = 3000 - margin.top - margin.bottom;
 
 var i = 0;
 var duration = 750;
 
 var tree = d3.layout.tree()
-  .size([height, width]);
+    //.nodeSize([50, 50])
+    .size([height, width]);
 
 var diagonal = d3.svg.diagonal()
   .projection(function(d) { return [d.y, d.x]; });
@@ -46,7 +47,7 @@ function update(source) {
     links = tree.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 90; });
+  nodes.forEach(function(d) { d.y = d.depth * 95 + 450; });
 
   // Update the nodes…
   var node = svg.selectAll("g.node")
@@ -60,7 +61,8 @@ function update(source) {
 
   nodeEnter.append("circle")
     .attr("r", 1e-6)
-    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+    .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; })
+    .attr("class", function(d) { return d.best_path ? "best_path" : ""; });
 
   nodeEnter.append("text")
     .attr("dy", "2.5em")
@@ -70,7 +72,7 @@ function update(source) {
   nodeEnter.append("text")
     .attr("dy", "3.5em")
     .attr("text-anchor", "middle")
-    .text(function(d) { return d.score })
+    .text(function(d) { return d.score + " " + d.alignment })
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
