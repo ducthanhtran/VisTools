@@ -86,7 +86,7 @@ def _add_graph_level(graph, level, parent_ids, names, scores, model_scores=None,
         graph.node[new_node]["score"] = score_str
         graph.node[new_node]["model_scores"] = model_scores_str
         graph.node[new_node]["size"] = 100
-        graph.node[new_node]["alignment"] = alignment[level]
+        graph.node[new_node]["alignment"] = alignment[i] if alignment is not None else ""
         graph.node[new_node]["best_path"] = False
         # Add an edge to the parent
         graph.add_edge(parent_node, new_node)
@@ -105,9 +105,9 @@ def create_graph(predicted_ids, parent_ids, scores, predicted_tokens, model_scor
     for level in range(seq_length):
         names = [pred for pred in predicted_tokens[level]]
         mod_scores = model_scores[level] if model_scores is not None else None
-        coverages = alignment[level] if alignment is not None else None
+        alignments = alignment[level] if alignment is not None else None
         min_node = _add_graph_level(graph, level + 1, parent_ids[level], names, scores[level], model_scores=mod_scores,
-                         alignment=coverages)
+                         alignment=alignments)
 
     graph.node[(0, 0)]["name"] = "START"
     return graph, min_node
@@ -149,7 +149,7 @@ def main():
             while min_node is not None:
                 graph.node[min_node]["best_path"] = True
                 translation.insert(0, graph.node[min_node]["name"])
-                if min_node == (0,0):
+                if min_node == (0, 0):
                     min_node = None
                 else:
                     min_node = list(graph.in_edges(min_node))[0][0]

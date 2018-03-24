@@ -23,35 +23,51 @@ var tree = d3.layout.tree()
     //.nodeSize([50, 50])
     .size([height, width]);
 
+tree.separation(function(a, b) {
+  return (a.parent == b.parent ? 1 : 2)/(a.depth) ;
+});
 var diagonal = d3.svg.diagonal()
   .projection(function(d) { return [d.y, d.x]; });
 
 var svg = d3.select("body").append("svg")
+    .attr("id", "beam-svg")
   .attr("width",  width + margin.right + margin.left)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 root = treeData;
-root.x0 = height / 2;
-root.y0 = 0;
 
 update(root);
 
 d3.select(self.frameElement).style("height", "1000px");
 
+
+
 function update(source) {
 
-  // Compute the new tree layout.
+  var newHeight = Math.max(tree.nodes(root).reverse().length * 20, height);
+
+  d3.select("#beam-svg")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", newHeight + margin.top + margin.bottom);
+
+  tree = d3.layout.tree().size([newHeight, width]);
+
   var nodes = tree.nodes(root).reverse(),
-    links = tree.links(nodes);
+      links = tree.links(nodes);
 
-  // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 95 + 450; });
+  root.x0 = height / 2;
+  root.y0 = 0;
 
-  // Update the nodes…
+  nodes.forEach(function (d) {
+    d.y = d.depth * 90;
+  });
+
   var node = svg.selectAll("g.node")
-    .data(nodes, function(d) { return d.id || (d.id = ++i); });
+  .data(nodes, function (d) {
+    return d.id || (d.id = ++i);
+  });
 
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("g")
@@ -72,7 +88,15 @@ function update(source) {
   nodeEnter.append("text")
     .attr("dy", "3.5em")
     .attr("text-anchor", "middle")
-    .text(function(d) { return d.score + " " + d.alignment })
+    .text(function(d) {
+      var score = (d.score != undefined)? d.score : "";
+      var alignment = (d.alignment != undefined)? d.alignment: "";
+      return score + " " + alignment });
+
+  nodeEnter.append("text")
+    .attr("dy", "4.5em")
+    .attr("text-anchor", "middle")
+    .text(function(d) {return d.model_scores })
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
