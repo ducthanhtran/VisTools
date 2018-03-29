@@ -60,8 +60,8 @@ HTML_TEMPLATE = Template("""
     <!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
     <script src="d3.v3.min.js"></script>
   </head>
-  <body>
-  <p>$SENTENCE</p>
+  <body style="position:absolute; width: 100%; height:100%">
+  <p style="position:relative;">$SENTENCE</p>
     <script>
       var treeData = $DATA
     </script>

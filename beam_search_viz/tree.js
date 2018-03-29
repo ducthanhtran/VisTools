@@ -13,8 +13,10 @@
 // limitations under the License.
 
 var margin = { top: 20, right: 120, bottom: 20, left: 120 },
-  width = 5000 - margin.right - margin.left,
-  height = 3000 - margin.top - margin.bottom;
+  width = 1850 - margin.right - margin.left,
+  height = 1000 - margin.top - margin.bottom;
+
+var tree_height = height;
 
 var i = 0;
 var duration = 750;
@@ -31,28 +33,52 @@ var diagonal = d3.svg.diagonal()
 
 var svg = d3.select("body").append("svg")
     .attr("id", "beam-svg")
-  .attr("width",  width + margin.right + margin.left)
-  .attr("height", height + margin.top + margin.bottom)
+        .attr("style", "width:100%;height:90%;position:relative;top:" + margin.top +";")
+    .call(d3.behavior.zoom()
+      .scaleExtent([0.1, 5])
+      .on("zoom", zoom))
   .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  .attr("class", "drawarea")
+  .append("g")
+        .attr("class", "tree")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+  ;
 
 root = treeData;
 
 update(root);
 
-d3.select(self.frameElement).style("height", "1000px");
+d3.select("g.tree").attr("transform", "translate("+ margin.left +", -" + (root.x0 - height/2)+ ")")
+
+//d3.select(self.frameElement).style("height", "1000px");
 
 
+function zoom(){
+  var scale = d3.event.scale,
+      translation = d3.event.translate,
+      tbound = -tree_height * scale,
+      bbound = tree_height * scale,
+      lbound = (-width + margin.right) * scale,
+      rbound = (width - margin.left) * scale;
+    // limit translation to thresholds
+    translation = [
+        Math.max(Math.min(translation[0], rbound), lbound),
+        Math.max(Math.min(translation[1], bbound), tbound)
+    ];
+    d3.select(".drawarea")
+        .attr("transform", "translate(" + translation + ")" +
+              " scale(" + scale + ")");
+}
 
 function update(source) {
 
-  var newHeight = Math.max(tree.nodes(root).reverse().length * 20, height);
+  tree_height = Math.max(tree.nodes(root).reverse().length * 20, height)
 
-  d3.select("#beam-svg")
+  d3.select("#beam-svg .drawarea")
     .attr("width", width + margin.right + margin.left)
-    .attr("height", newHeight + margin.top + margin.bottom);
+    .attr("height", tree_height + margin.top + margin.bottom);
 
-  tree = d3.layout.tree().size([newHeight, width]);
+  tree = d3.layout.tree().size([tree_height, width]);
 
   var nodes = tree.nodes(root).reverse(),
       links = tree.links(nodes);
