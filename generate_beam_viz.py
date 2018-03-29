@@ -57,7 +57,8 @@ HTML_TEMPLATE = Template("""
     <meta charset="utf-8">
     <title>Beam Search</title>
     <link rel="stylesheet" type="text/css" href="tree.css">
-    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
+    <script src="d3.v3.min.js"></script>
   </head>
   <body>
   <p>$SENTENCE</p>
@@ -123,6 +124,7 @@ def main():
     # Copy required files
     shutil.copy2(path_base + "/beam_search_viz/tree.css", ARGS.output_dir)
     shutil.copy2(path_base + "/beam_search_viz/tree.js", ARGS.output_dir)
+    shutil.copy2(path_base + "/beam_search_viz/d3.v3.min.js", ARGS.output_dir)
 
     with open(ARGS.data, 'r') as file:
         idx = 0
