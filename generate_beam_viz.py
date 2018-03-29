@@ -31,6 +31,7 @@ import json
 import shutil
 import logging
 from string import Template
+import html
 
 import networkx as nx
 from networkx.readwrite import json_graph
@@ -148,7 +149,7 @@ def main():
             translation = []
             while min_node is not None:
                 graph.node[min_node]["best_path"] = True
-                translation.insert(0, graph.node[min_node]["name"])
+                translation.insert(0, html.escape(graph.node[min_node]["name"]))
                 if min_node == (0, 0):
                     min_node = None
                 else:
