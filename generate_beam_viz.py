@@ -73,7 +73,8 @@ HTML_TEMPLATE = Template("""
 def _add_graph_level(graph, level, parent_ids, names, scores, model_scores=None, alignment=None):
     """Adds a levelto the passed graph"""
     scores_list = scores if isinstance(scores, list) else [scores]
-    min_score = min(scores_list)
+    sentence_end_indices = [i for i, x in enumerate(names) if x == "</s>"]
+    min_score = min([scores_list[x] for x in sentence_end_indices]) if len(sentence_end_indices) > 0 else None
     min_node = None
     for i, parent_id in enumerate(parent_ids):
         new_node = (level, i)
