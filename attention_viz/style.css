@@ -1,0 +1,11 @@
+.word {
+    padding:0 5px;
+}
+
+.sentence {
+    margin: 10px 0;
+}
+
+.trg .word:hover {
+    background-color: rgba(255, 0, 0, .5);
+}

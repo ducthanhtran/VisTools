@@ -1,7 +1,14 @@
 import json
 import html
-import os
 import argparse
+import os
+import logging
+
+from utils import copy_files
+
+logging.getLogger().setLevel(logging.INFO)
+logging.basicConfig(format='[%(levelname)s:attention_viz] %(message)s', level=logging.INFO)
+
 
 PARSER = argparse.ArgumentParser(
     description="Generate beam search visualizations")
@@ -9,8 +16,8 @@ PARSER.add_argument(
     "-d", "--data", type=str, required=True,
     help="path to the attention data file")
 PARSER.add_argument(
-    "-o", "--output", type=str, required=False,
-    help="path to the output file. If not given stdout is used.")
+    "-o", "--output-dir", type=str, required=True,
+    help="path to the output directory.")
 ARGS = PARSER.parse_args()
 
 filepath = ARGS.data
@@ -43,75 +50,12 @@ with open(filepath) as fp:
 
 html_string = "<html><head>"
 html_string += """
-<style>
-.word {
-    padding:0 5px;
-}
-
-.sentence {
-    margin: 10px 0;
-}
-
-.trg .word:hover {
-    background-color: rgba(255, 0, 0, .5);
-}
-</style>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="attention.js"></script>
 <script> var data = %s; </script>
 <script>
 document.addEventListener("DOMContentLoaded", function(event) { 
-        var sentences = document.getElementById("sentences")
-        for(var i = 0; i < data.length; ++i) {
-
-            // console.log("trg",data[i].trg.length)
-            // console.log("src", data[i].src.length)
-            // console.log("attention", data[i].attentions.length)
-            var src = document.createElement("div")
-            src.setAttribute("class", "src");
-            src.id="src-" + i
-            for(var j = 0; j < data[i].src.length; ++j){
-                var word = document.createElement("span")
-                word.setAttribute("class", "word");
-                word.id = "source-" + j
-                word.innerHTML = data[i].src[j]
-                src.appendChild(word)
-            }
-
-            var trg = document.createElement("div")
-            trg.setAttribute("class", "trg");
-            for(var j = 0; j < data[i].trg.length; ++j){
-                var word = document.createElement("span")
-                word.id = "target-" + j
-                word.setAttribute("class", "word");
-                word.dataset.src_id = "src-" + i
-                word.dataset.attention = JSON.stringify(data[i].attentions[j])
-                word.innerHTML = data[i].trg[j]
-                word.onmouseover = function() {
-                    var src_sen = document.getElementById(this.dataset.src_id)
-                    var attentions = JSON.parse(this.dataset.attention)
-                    var sum = 0
-                    for( var s = 0; s < attentions.length; ++s){
-                        sum += parseFloat(attentions[s])
-                    }
-                    for( var child_id = 0; child_id < src_sen.children.length; ++child_id){
-                        child = src_sen.children[child_id]
-                        color = parseFloat(attentions[child_id])/sum
-                        child.style.backgroundColor = "rgba(255, 0, 0, " + color +")"
-                    }
-                }   
-                trg.appendChild(word)
-            }
-            var sen = document.createElement("div")
-            sen.setAttribute("class", "sentence")
-            var p = document.createTextNode( "sentence " + data[i].id)
-            var h2 = document.createElement("h2")
-            h2.appendChild(p)
-            sen.appendChild(h2)
-            sen.id = "sentence-" + data[i].id
-            sen.appendChild(src)
-            sen.appendChild(trg)
-            sentences.appendChild(sen)
-        }
+    attention_viz(data);
 });
  </script>
  </head>
@@ -121,9 +65,17 @@ document.addEventListener("DOMContentLoaded", function(event) {
  </html>
  """ % json.dumps(sentences, ensure_ascii=True).replace("\\n", "")
 
-output_path = ARGS.output
+output_files = [
+    'attention_viz/attention.js',
+    'attention_viz/style.css'
+]
+
+copy_files(output_files, ARGS.output_dir, logger=logging)
+
+output_path = os.path.join(ARGS.output_dir, "index.html")
 if output_path is not None:
     with open(output_path, "w") as file:
+        logging.info("write index file to %s" % (output_path))
         file.write(html_string)
 else:
     print(html_string)
