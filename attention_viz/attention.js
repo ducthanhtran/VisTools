@@ -1,4 +1,4 @@
-function attention__viz(data) {
+function attention_viz(data) {
     var sentences = document.getElementById("sentences")
     for(var i = 0; i < data.length; ++i) {
 
