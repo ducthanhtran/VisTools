@@ -29,4 +29,4 @@ def copy_files(
     for file in file_list:
         if logger is not None:
             logger.info("copy file %s to %s" % (file, output_dir))
-        shutil.copy2(os.path.join(path_base, file), output_dir)
+        shutil.copy(os.path.join(path_base, file), output_dir)
