@@ -1,8 +1,20 @@
 import json
 import html
 import os
+import argparse
 
-filepath="f+attention-newstest2017.b12.hyp"
+PARSER = argparse.ArgumentParser(
+    description="Generate beam search visualizations")
+PARSER.add_argument(
+    "-d", "--data", type=str, required=True,
+    help="path to the attention data file")
+PARSER.add_argument(
+    "-o", "--output", type=str, required=False,
+    help="path to the output file. If not given stdout is used.")
+ARGS = PARSER.parse_args()
+
+filepath = ARGS.data
+
 with open(filepath) as fp:
     content = fp.readlines()
     sent = {}
@@ -109,4 +121,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
  </html>
  """ % json.dumps(sentences, ensure_ascii=True).replace("\\n", "")
 
-print(html_string)
+output_path = ARGS.output
+if output_path is not None:
+    with open(output_path, "w") as file:
+        file.write(html_string)
+else:
+    print(html_string)
