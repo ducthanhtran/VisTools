@@ -52,14 +52,35 @@ with open(filepath) as fp:
 
 #    print("data = '" + json.dumps(sentences).replace("\\n", "").replace("'", "\\'") + "';")
 
-html_string = "<html><head>"
-html_string += """
+html_string_overlay = "<html><head>"
+html_string_overlay += """
 <link rel="stylesheet" type="text/css" href="style.css">
 <script src="attention.js"></script>
 <script> var data = %s; </script>
 <script>
 document.addEventListener("DOMContentLoaded", function(event) { 
-    attention_viz(data);
+    attention_viz_overlay(data);
+});
+ </script>
+ </head>
+ <body>
+ <div id="sentences"></div>
+ </body>
+ </html>
+ """ % json.dumps(sentences, ensure_ascii=True).replace("\\n", "")
+
+
+html_string_matrix = "<html><head>"
+html_string_matrix += """
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="d3.v3.min.js"></script>
+<script src="https://cdn.rawgit.com/eligrey/FileSaver.js/5ed507ef8aa53d8ecfea96d96bc7214cd2476fd2/FileSaver.min.js"></script>
+<script src="https://cdn.rawgit.com/eligrey/Blob.js/0cef2746414269b16834878a8abc52eb9d53e6bd/Blob.js"></script>
+<script src="attention.js"></script>
+<script> var data = %s; </script>
+<script>
+document.addEventListener("DOMContentLoaded", function(event) { 
+    attention_viz_matrix(data);
 });
  </script>
  </head>
@@ -71,15 +92,20 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 output_files = [
     'attention_viz/attention.js',
-    'attention_viz/style.css'
+    'attention_viz/style.css',
+    'attention_viz/d3.v3.min.js',
 ]
 
 copy_files(output_files, ARGS.output_dir, logger=logging)
 
-output_path = os.path.join(ARGS.output_dir, "index.html")
-if output_path is not None:
-    with open(output_path, "w") as file:
-        logging.info("write index file to %s" % (output_path))
-        file.write(html_string)
-else:
-    print(html_string)
+output_path_overlay = os.path.join(ARGS.output_dir, "index.html")
+if output_path_overlay is not None:
+    with open(output_path_overlay, "w") as file:
+        logging.info("write index file to %s" % output_path_overlay)
+        file.write(html_string_overlay)
+
+output_path_matrix = os.path.join(ARGS.output_dir, "index_matrix.html")
+if output_path_matrix is not None:
+    with open(output_path_matrix, "w") as file:
+        logging.info("write index file to %s" % output_path_matrix)
+        file.write(html_string_matrix)
