@@ -8,7 +8,16 @@ def copy_files(
         output_dir: str,
         base: str = None,
         logger: logging.Logger = None):
-
+    """
+    copy a list of file to an output directory
+    keep file metadata intact
+    use logger if given
+    :param file_list: list of files relative to the base directory
+    :param output_dir: path to output directory
+    :param base: (optional) base path instead of current directory
+    :param logger: (optional) if not none enable logger
+    :return:
+    """
     if not os.path.exists(output_dir):
         if logger is not None:
             logger.info("create output directory %s" % output_dir)
