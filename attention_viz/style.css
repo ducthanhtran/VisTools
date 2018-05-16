@@ -9,3 +9,11 @@
 .trg .word:hover {
     background-color: rgba(255, 0, 0, .5);
 }
+.sentence .trg:before{
+	content: "Target ";
+    font-family: monospace;
+}
+.sentence .src:before{
+	content: "Source ";
+    font-family: monospace;
+}
