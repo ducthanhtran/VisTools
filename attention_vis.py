@@ -3,6 +3,7 @@ import html
 import argparse
 import os
 import logging
+import numpy as np
 
 from utils import copy_files
 
@@ -27,24 +28,27 @@ with open(filepath) as fp:
     sent = {}
     sentences = []
     first = True
+    attentions = []
     for line in content:
         tokens = line.split('|||')
         if first:
             first=False
             sent['id'] = tokens[0]
-            sent['src'] = html.escape(tokens[1]).strip().split(' ')
+            sent['src'] = html.escape(tokens[3]).strip().split(' ')
             sent['score'] = tokens[2]
-            sent['trg'] = html.escape(tokens[3]).strip().split(' ')
+            sent['trg'] = html.escape(tokens[1]).strip().split(' ')
             sent['src_length'] = tokens[4]
             sent['trg_lenght'] = tokens[5]
             sent['attentions'] = []
         elif len(tokens) == 1 and tokens[0] == '\n':
+            #print(np.array(attentions).shape, np.array(attentions).transpose().shape)
+            sent['attentions'] = np.array(attentions).transpose().tolist()
             first = True
             sentences.append(sent)
-            sent={}
+            sent = {}
+            attentions = []
         else:
-            sent['attentions'].append(tokens[0].split(' '))
-
+            attentions.append([float(x) for x in tokens[0].replace('\n', '').split(' ')])
 
 #    print("data = '" + json.dumps(sentences).replace("\\n", "").replace("'", "\\'") + "';")
 
