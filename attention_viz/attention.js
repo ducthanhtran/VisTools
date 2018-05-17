@@ -161,7 +161,7 @@ function attention_viz_matrix(data){
             .attr("transform", "rotate(-90)")
             .attr("y", 0 - margin.left + 10)
             .attr("x",0 - (height / 2))
-            .attr("dy", "1em")
+            .attr("dy", "10px")
             .style("text-anchor", "middle")
             .text("Target");
 
@@ -220,7 +220,7 @@ function attention_viz_matrix(data){
             .attr("dx", "10px")
             .attr("dy", itemSize/2+"px")
             .attr("transform", function (d) {
-                return "rotate(-90)";
+                return "rotate(-65)";
             });
 
         svg.selectAll("g .axis path")
