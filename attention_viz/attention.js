@@ -138,14 +138,6 @@ function attention_viz_matrix(data){
             })
             .orient("top")
 
-        d3.selectAll(".axis path")
-            .style("stroke", "#000000")
-            .style("fill", "none")
-            .style("stroke-width", "1px");
-        d3.selectAll(".axis line")
-            .style("stroke", "#000000")
-            .style("fill", "none")
-            .style("stroke-width", "1px");
 
         svg.append("text")
           .attr("transform",
@@ -173,6 +165,28 @@ function attention_viz_matrix(data){
             .style("text-anchor", "middle")
             .text("Target");
 
+         svg.selectAll("line.vertical")
+            .data(x_elements)
+            .enter().append("svg:line")
+            .attr("x1", function(d){return itemSize + xScale(d);})
+            .attr("y1", 0)
+            .attr("x2", function(d){return itemSize + xScale(d);})
+            .attr("y2", itemSize*(trgLength) )
+            .style("stroke", "#000000")
+            .style("opacity", "0.2")
+            .style("stroke-width", 1);
+
+         svg.selectAll("line.horizontal")
+            .data(y_elements)
+            .enter().append("svg:line")
+            .attr("y1", function(d){return itemSize + yScale(d);})
+            .attr("x1", 0)
+            .attr("y2", function(d){return itemSize + yScale(d);})
+            .attr("x2", itemSize*(srcLength) )
+            .style("stroke", "#000000")
+            .style("opacity", "0.2")
+            .style("stroke-width", 1);
+
         var cells = svg.selectAll('rect')
             .data(sen_data)
             .enter().append('g').append('rect')
@@ -196,6 +210,7 @@ function attention_viz_matrix(data){
             .selectAll('text')
             .attr('font-weight', 'normal');
 
+
         svg.append("g")
             .attr("class", "x axis")
             .call(xAxis)
@@ -208,5 +223,15 @@ function attention_viz_matrix(data){
                 return "rotate(-65)";
             });
 
+        svg.selectAll("g .axis path")
+            .call(xAxis)
+            .style("stroke", "#000000")
+            .style("fill", "none")
+            .style("stroke-width", "1px");
+        svg.selectAll("g .axis line")
+            .call(xAxis)
+            .style("stroke", "#000000")
+            .style("fill", "none")
+            .style("stroke-width", "1px");
     }
 }
