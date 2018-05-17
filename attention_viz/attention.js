@@ -174,8 +174,9 @@ function attention_viz_matrix(data){
             .attr('x', function (d) {
                 return xScale(d.srcWord);
             })
-            .attr('fill', function (d) {
-                return "rgba(0, 0,0, " + d.value + ")";
+            .attr('fill', '#000000')
+            .attr('opacity', function (d) {
+                return  d.value;
             });
 
         svg.append("g")
