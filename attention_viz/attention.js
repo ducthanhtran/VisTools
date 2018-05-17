@@ -134,8 +134,16 @@ function attention_viz_matrix(data){
             .tickFormat(function (d) {
                 return d;
             })
-            .orient("top");
+            .orient("top")
 
+        d3.selectAll(".axis path")
+            .style("stroke", "#000000")
+            .style("fill", "none")
+            .style("stroke-width", "1px");
+        d3.selectAll(".axis line")
+            .style("stroke", "#000000")
+            .style("fill", "none")
+            .style("stroke-width", "1px");
         svg.append("text")
           .attr("transform",
                 "translate(" + (width/2) + " ," + (-margin.top + 30) + ")")
