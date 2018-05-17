@@ -217,10 +217,10 @@ function attention_viz_matrix(data){
             .selectAll('text')
             .attr('font-weight', 'normal')
             .style("text-anchor", "start")
-            .attr("dx", ".8em")
-            .attr("dy", ".5em")
+            .attr("dx", "10px")
+            .attr("dy", itemSize/2+"px")
             .attr("transform", function (d) {
-                return "rotate(-65)";
+                return "rotate(-90)";
             });
 
         svg.selectAll("g .axis path")
