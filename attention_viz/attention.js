@@ -146,6 +146,7 @@ function attention_viz_matrix(data){
             .style("stroke", "#000000")
             .style("fill", "none")
             .style("stroke-width", "1px");
+
         svg.append("text")
           .attr("transform",
                 "translate(" + (width/2) + " ," + (-margin.top + 30) + ")")
@@ -166,7 +167,7 @@ function attention_viz_matrix(data){
 
         svg.append("text")
             .attr("transform", "rotate(-90)")
-            .attr("y", 0 - margin.left)
+            .attr("y", 0 - margin.left + 10)
             .attr("x",0 - (height / 2))
             .attr("dy", "1em")
             .style("text-anchor", "middle")
