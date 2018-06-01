@@ -17,6 +17,10 @@ PARSER.add_argument(
     "-d", "--data", type=str, required=True,
     help="path to the attention data file")
 PARSER.add_argument(
+    "-s", "--scale-max", action="store_true",
+    help="scale attentions by the max of the sentence"
+)
+PARSER.add_argument(
     "-o", "--output-dir", type=str, required=True,
     help="path to the output directory.")
 ARGS = PARSER.parse_args()
@@ -42,7 +46,8 @@ with open(filepath) as fp:
             sent['attentions'] = []
         elif len(tokens) == 1 and tokens[0] == '\n':
             #print(np.array(attentions).shape, np.array(attentions).transpose().shape)
-            sent['attentions'] = np.array(attentions).transpose().tolist()
+            max_attention = max(max(attentions)) if ARGS.scale_max else 1
+            sent['attentions'] = (np.array(attentions)/max_attention).transpose().tolist()
             first = True
             sentences.append(sent)
             sent = {}

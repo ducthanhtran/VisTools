@@ -28,13 +28,13 @@ function attention_viz_overlay(data) {
             word.onmouseover = function() {
                 var src_sen = document.getElementById(this.dataset.src_id)
                 var attentions = JSON.parse(this.dataset.attention)
-                var sum = 0
-                for( var s = 0; s < attentions.length; ++s){
-                    sum += parseFloat(attentions[s])
-                }
+//                var sum = 0
+//                for( var s = 0; s < attentions.length; ++s){
+//                    sum += parseFloat(attentions[s])
+//                }
                 for( var child_id = 0; child_id < src_sen.children.length; ++child_id){
                     child = src_sen.children[child_id]
-                    color = parseFloat(attentions[child_id])/sum
+                    color = parseFloat(attentions[child_id]) // /sum
                     child.style.backgroundColor = "rgba(255, 0, 0, " + color +")"
                 }
             }
